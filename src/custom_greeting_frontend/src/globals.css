@@ -1,0 +1,155 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #01001f;
+    --foreground: #ffffff;
+    --muted: #b8b8b8;
+  }
+}
+
+@layer base {
+  * {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply relative w-full min-h-screen flex flex-col bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .homepage-head {
+    @apply max-lg:text-center text-xl font-semibold uppercase text-transparent bg-[linear-gradient(90deg,#B62EA7_0%,#701199_94.5%)] bg-clip-text lg:tracking-[3.48px];
+  }
+
+  .homepage-title {
+    @apply text-[30px] max-lg:text-center lg:text-[55px] font-semibold lg:leading-normal;
+  }
+
+  .homepage-highlight {
+    @apply text-transparent bg-[linear-gradient(90deg,#3D31C1_42.39%,#985FF1_88.09%)] bg-clip-text;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    @apply px-[1.8rem];
+  }
+}
+
+/* Base styles for the card */
+.card {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden; /* Clip the children to the card's rounded corners */
+  z-index: 10; /* Set a stacking context for the card */
+}
+
+/* Pseudo-elements for the animated borders */
+.card::before,
+.card::after,
+.card > *::before,
+.card > *::after {
+  content: "";
+  position: absolute;
+  background-color: rgba(57, 48, 145, 1); /* Color for the animated elements */
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition for the transform */
+  z-index: 20; /* Ensure they are above the card's content */
+  border-radius: 30px;
+}
+
+/* Top border animation */
+.card::before {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  transform: translate3d(-100%, 0, 0);
+}
+
+/* Bottom border animation */
+.card::after {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  transform: translate3d(100%, 0, 0);
+}
+
+/* Left border animation */
+.card > *::before {
+  top: -10px;
+  left: 0;
+  height: calc(100% + 20px);
+  width: 2px;
+  transform: translate3d(0, -100%, 0);
+}
+
+/* Right border animation */
+.card > *::after {
+  bottom: -10px;
+  right: 0;
+  height: calc(100% + 20px);
+  width: 2px;
+  transform: translate3d(0, 100%, 0);
+}
+
+/* Hover state transformations */
+.card:hover::before,
+.card:hover::after,
+.card:hover > *::before,
+.card:hover > *::after {
+  transform: translate3d(0, 0, 0);
+}
+/* global.css or specific css file for modal styling */
+.payment-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  padding: 20px;
+  background-color: #1a1a2e;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  color: white;
+  z-index: 1001; /* Make sure it stays on top */
+  text-align: center;
+}
+
+.payment-modal h2 {
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.payment-modal p {
+  margin-bottom: 20px;
+}
+
+.payment-modal button {
+  background-color: #7b68ee;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.payment-modal button:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000; /* Make sure it covers the entire page */
+}
