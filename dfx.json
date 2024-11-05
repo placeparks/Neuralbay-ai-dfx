@@ -1,18 +1,18 @@
 {
   "canisters": {
-    "custom_greeting_backend": {
-      "main": "src/custom_greeting_backend/main.mo",
+    "neuralbay_backend": {
+      "main": "src/neuralbay_backend/main.mo",
       "type": "motoko"
     },
-    "custom_greeting_frontend": {
+    "neuralbay_frontend": {
       "dependencies": [
-        "custom_greeting_backend"
+        "neuralbay_backend"
       ],
       "source": [
-        "src/custom_greeting_frontend/dist"
+        "src/neuralbay_frontend/dist"
       ],
       "type": "assets",
-      "workspace": "custom_greeting_frontend"
+      "workspace": "neuralbay_frontend"
     }
   },
   "defaults": {
