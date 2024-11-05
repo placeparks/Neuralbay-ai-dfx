@@ -21,6 +21,11 @@
       "packtool": ""
     }
   },
+  "networks": {
+    "ic": {
+      "providers": ["https://ic0.app"]
+    }
+  },
   "output_env_file": ".env",
   "version": 1
 }
