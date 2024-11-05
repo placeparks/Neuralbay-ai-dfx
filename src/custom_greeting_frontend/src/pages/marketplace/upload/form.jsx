@@ -1,48 +1,37 @@
-"use client";
+// src/components/UploadModelForm.js
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../../../../components/ui/form";
+import React, { useContext, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../../../../supabaseClient";
+import { AuthContext } from "../../../../context/AuthContext";
+import { Actor, HttpAgent } from "@dfinity/agent";
+import { idlFactory } from "../../../../../declarations/custom_greeting_backend";
+
+// Import your UI components
+import { Button } from "../../../../components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../../../../components/ui/form";
 import { Input } from "../../../../components/ui/input";
 import { Textarea } from "../../../../components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "../../../../components/ui/radio-group";
-import { useFieldArray, useForm } from "react-hook-form";
-import { Label } from "../../../../components/ui/label";
 import { Switch } from "../../../../components/ui/switch";
-import { Button } from "../../../../components/ui/button";
-import { useState } from "react";
-import {useRouter} from "react-router-dom";
+import { Label } from "../../../../components/ui/label";
 
 export default function UploadModelForm() {
-  const router = useRouter();
+  const navigate = useNavigate();
+  const { principal, login } = useContext(AuthContext) || {};
   const [isLoading, setIsLoading] = useState(false);
 
+  const canisterId = "ezvoz-kqaaa-aaaal-qnbpq-cai";
+  const agent = new HttpAgent({ host: "https://ic0.app" });
+  const backendActor = Actor.createActor(idlFactory, { agent, canisterId });
+
   const methods = [
-    {
-      id: "1",
-      method: "GET",
-    },
-    {
-      id: "2",
-      method: "POST",
-    },
-    {
-      id: "3",
-      method: "PUT",
-    },
-    {
-      id: "4",
-      method: "DELETE",
-    },
-    {
-      id: "5",
-      method: "PATCH",
-    },
+    { id: "1", method: "GET" },
+    { id: "2", method: "POST" },
+    { id: "3", method: "PUT" },
+    { id: "4", method: "DELETE" },
+    { id: "5", method: "PATCH" },
   ];
 
   const form = useForm({
@@ -50,42 +39,80 @@ export default function UploadModelForm() {
       url: "",
       name: "",
       description: "",
+      modelImg: "",
       method: methods[0].method,
-      headers: {
-        key: "",
-        value: "",
-      },
-      parameters: {
-        limit: 0,
-        offset: 0,
-      },
+      headers: { key: "", value: "" },
+      parameters: { limit: 0, offset: 0 },
       input: "TEXT",
       output: "TEXT",
       isStatus: false,
+      walletPrincipalId: "",
     },
   });
 
   const onSubmit = async (values) => {
+    setIsLoading(true);
+
     try {
-      console.log(values);
-      setIsLoading(true);
-      const res = await fetch(`/api/endpoints`, {
-        method: "POST",
-        body: JSON.stringify({
-          ...values,
-          userId: "1231234",
-        }),
-      });
-      const data = await res.json();
-      console.log(data);
-      router.replace("/marketplace");
-      setIsLoading(false);
+      // Upload to Supabase
+      const { data, error } = await supabase
+        .from("models")
+        .insert([
+          {
+            name: values.name,
+            description: values.description,
+            modelimg: values.modelImg || "/images/default.png",
+            price: values.price || 0,
+            principal_id: principal,
+            wallet_principal_id: values.walletPrincipalId, 
+          },
+        ]);
+
+      if (error) throw error;
+
+      // Upload to backend canister
+      const canisterResponse = await backendActor.addModel(
+        values.name,
+        values.url,
+        values.walletPrincipalId // Pass the wallet principal to the canister
+      );
+
+      console.log("Canister response:", canisterResponse);
+
+      // Navigate to marketplace on success
+      navigate("/marketplace");
     } catch (error) {
-      console.error(error);
+      console.error("Error saving model:", error);
+    } finally {
       setIsLoading(false);
     }
-    // console.log(values);
   };
+
+
+  if (!principal) {
+    return (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm z-50">
+          <div className="bg-white p-8 rounded-lg shadow-xl w-80 text-center">
+            <h2 className="text-2xl font-semibold mb-6 text-gray-800">Access Restricted</h2>
+            <p className="text-gray-600 mb-6">
+              Please log in with DFINITY to access the marketplace.
+            </p>
+            <button
+              onClick={handleLogin}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg font-medium"
+            >
+              Login with DFINITY
+            </button>
+            <button
+              onClick={() => setShowLoginPrompt(false)}
+              className="mt-4 w-full bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+    );
+  }
 
   return (
     <section className="container py-8 space-y-6">
@@ -110,7 +137,6 @@ export default function UploadModelForm() {
                     className="bg-background border-[#4E3EAD] focus:outline-none"
                   />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -141,12 +167,10 @@ export default function UploadModelForm() {
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="font-normal">
-                  Model Description*
-                </FormLabel>
+                <FormLabel className="font-normal">Model Description*</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Short summery about your model"
+                    placeholder="Short summary about your model"
                     {...field}
                     className="bg-background border-[#4E3EAD] focus:outline-none"
                   />
@@ -156,33 +180,60 @@ export default function UploadModelForm() {
             )}
           />
 
-          {/* Method */}
+          {/* Model Image URL */}
           <FormField
             control={form.control}
-            name="method"
+            name="modelImg"
             render={({ field }) => (
-              <FormItem className="space-y-3">
-                <FormLabel className="font-normal">Method*</FormLabel>
+              <FormItem>
+                <FormLabel className="font-normal">Image URL</FormLabel>
                 <FormControl>
-                  <RadioGroup
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    className="flex items-center gap-6"
-                  >
-                    {methods.map((item) => (
-                      <FormItem
-                        key={item.id}
-                        className="flex items-center space-x-2 space-y-0.5"
-                      >
-                        <FormControl>
-                          <RadioGroupItem value={item.method} />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          {item.method}
-                        </FormLabel>
-                      </FormItem>
-                    ))}
-                  </RadioGroup>
+                  <Input
+                    type="url"
+                    placeholder="Enter the image URL for your model"
+                    {...field}
+                    className="bg-background border-[#4E3EAD] focus:outline-none"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+             {/* Wallet Principal ID */}
+             <FormField
+            control={form.control}
+            name="walletPrincipalId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-normal">Wallet Principal ID*</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="Enter wallet principal ID to receive tokens"
+                    {...field}
+                    className="bg-background border-[#4E3EAD] focus:outline-none"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Price */}
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-normal">Price In ICP*</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Enter the price of your model"
+                    {...field}
+                    className="bg-background border-[#4E3EAD] focus:outline-none"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -373,3 +424,5 @@ export default function UploadModelForm() {
     </section>
   );
 }
+
+

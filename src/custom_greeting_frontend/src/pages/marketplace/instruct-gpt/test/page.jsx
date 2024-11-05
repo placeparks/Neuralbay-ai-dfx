@@ -1,6 +1,6 @@
 "use client";
 
-import { generateImage } from "../../../../../lib/data"; 
+import { generateChat } from "../../../../../lib/data"; 
 import { Button } from "../../../../../components/ui/button";
 import { Form } from "../../../../../components/ui/form";
 import { Input } from "../../../../../components/ui/input";

@@ -1,5 +1,6 @@
 import Logo from "../public/images/logo.png";
 import { Button } from "./ui/button";
+import {Link} from "react-router-dom"
 
 import {
   Sheet,
@@ -31,8 +32,11 @@ export default function Header() {
           </ul>
 
           <div className="space-x-6">
-            <a href="/marketplace/upload"><Button className="rounded-md" variant={`secondary`}>Upload</Button></a>
-          
+          <Link to="/marketplace/upload">
+        <Button className="rounded-md" variant="secondary">
+          Upload
+        </Button>
+      </Link>          
             <Button>Login</Button>
           </div>
         </div>

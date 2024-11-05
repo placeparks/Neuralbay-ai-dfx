@@ -7,7 +7,8 @@ import GenerateImageTest from '../pages/marketplace/generate-image/test/page'
 import InstructGptTest from '../pages/marketplace/instruct-gpt/test/page'
 import TranscribeTest from '../pages/marketplace/transcribe/test/page'
 import LoginPage from '../../login'
-
+import UploadModel from '../pages/marketplace/upload/page'
+import ThankYou from '../thank-you'
 export default function AppRoutes() {
     return (
         <Routes>
@@ -20,7 +21,8 @@ export default function AppRoutes() {
             <Route path='/marketplace/instruct-gpt/test' element={<InstructGptTest/>} />
             <Route path='/marketplace/transcribe/test' element={<TranscribeTest/>} />
             <Route path='/login' element={<LoginPage/>} />
-
+            <Route path='/marketplace/upload' element={<UploadModel/>}/>
+            <Route path='thank-you' element={<ThankYou/>}/>
         </Routes>
     )
 }

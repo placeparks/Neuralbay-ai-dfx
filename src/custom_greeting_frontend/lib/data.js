@@ -1,10 +1,10 @@
 export const generateImage = async (prompt) => {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URI}/generate-image/?prompt=${prompt}`,
+        `${process.env.REACT_APP_API_URI}/generate-image/?prompt=${prompt}`,
         {
           method: "POST",
-          headers: { "Content-Type": "image/png" },
+          headers: {},
         }
       );
   
@@ -27,7 +27,7 @@ export const generateImage = async (prompt) => {
   export const generateChat = async (prompt) => {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URI}/chat/?prompt=${prompt}`,
+        `${process.env.REACT_APP_API_URI}/chat/?prompt=${prompt}`,
         {
           method: "POST",
         }
@@ -36,7 +36,7 @@ export const generateImage = async (prompt) => {
       if (!res.ok) {
         throw new Error("Failed to generate Chat.");
       }
-  
+
       const data = await res.json();
       return data;
     } catch (error) {
@@ -46,7 +46,7 @@ export const generateImage = async (prompt) => {
   
   export const generateTranscribe = async (formData) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URI}/transcribe/`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URI}/transcribe/`, {
         method: "POST",
         body: formData,
         redirect: "follow",
