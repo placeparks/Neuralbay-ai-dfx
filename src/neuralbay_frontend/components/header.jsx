@@ -7,7 +7,7 @@ import {
   SheetClose,
   SheetContent,
   SheetTrigger,
-} from "../components/ui/sheet";
+} from "./ui/sheet
 import { IoMenu } from "react-icons/io5";
 
 export default function Header() {
