@@ -1,5 +1,3 @@
-// src/components/Details.js
-
 import React, { useContext, useEffect, useState } from "react";
 import { Button } from "../../../../components/ui/button";
 import { models as staticModels } from "../../../../constants";
@@ -8,7 +6,7 @@ import { recordPurchaseInSupabase } from "../../../../utils/supabaseHelpers";
 import { AuthContext } from "../../../../context/AuthContext";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { supabase } from "../../../../supabaseClient";
-import { Star } from "lucide-react"; 
+import { Star } from "lucide-react";
 
 export default function Details() {
   const { id: modelId } = useParams(); // Retrieve model ID from URL params
@@ -16,7 +14,6 @@ export default function Details() {
   const { isConnected, connectPlug, requestTransfer } = usePlug();
   const authContext = useContext(AuthContext);
   const navigate = useNavigate();
-  const [activeTag, setActiveTag] = useState("Model Details");
 
   useEffect(() => {
     const staticModel = staticModels.find((item) => item.modelId === modelId);
@@ -25,37 +22,32 @@ export default function Details() {
       setModel(staticModel);
     } else {
       const fetchSupabaseModel = async () => {
-        const { data, error } = await supabase
-          .from("models")
-          .select("*")
-          .eq("id", modelId)
-          .single();
+        try {
+          const { data, error } = await supabase
+            .from("models")
+            .select("id, name, description, price, modelimg, wallet_principal_id") // Include wallet_principal_id
+            .eq("id", modelId)
+            .single();
 
-        if (error) {
-          console.error("Error fetching model from Supabase:", error);
-        } else {
-          setModel({
-            modelId: data.id || modelId,
-            modelImg: data.modelimg || "/default-image.jpg",
-            modelName: data.name || "Unnamed Model",
-            ratings: data.ratings || "0",
-            likes: data.likes || "0",
-            shortDes: data.description || "No description available",
-            modelPrice: {
-              eth: data.price || "0",
-              dollar: (data.price || 0) * 167,
-            },
-            modelTags: data.tags || [],
-            modelOverview: data.overview || "No overview available",
-            developedBy: data.developedBy || "Unknown",
-            modelType: data.type || "N/A",
-            languages: data.languages || ["N/A"],
-            licence: data.licence || "N/A",
-            modelDesc: data.description || "No detailed description available",
-            moreInfo: data.moreInfo || "No additional information",
-            category: data.category || "Uncategorized",
-            isFromSupabase: true,
-          });
+          if (error) {
+            console.error("Error fetching model from Supabase:", error);
+          } else {
+            console.log("Fetched model from Supabase:", data);
+
+            setModel({
+              modelId: data.id || modelId,
+              modelImg: data.modelimg || "/default-image.jpg",
+              modelName: data.name || "Unnamed Model",
+              shortDes: data.description || "No description available",
+              modelPrice: {
+                eth: data.price || "0",
+                dollar: (data.price || 0) * 167,
+              },
+              wallet_principal_id: data.wallet_principal_id || null, // Ensure wallet principal is set
+            });
+          }
+        } catch (err) {
+          console.error("Unexpected error fetching model:", err);
         }
       };
 
@@ -70,31 +62,25 @@ export default function Details() {
       return;
     }
 
-    if (window.ic?.plug) {
-      try {
-        const connected = await window.ic.plug.requestConnect();
-        if (connected) {
-          try {
-            const amountICP = parseFloat(model?.modelPrice?.eth || "0");
-            const recipientPrincipal = model.wallet_principal_id; 
+    if (!model || !model.wallet_principal_id) {
+      console.error("Recipient wallet address is missing.");
+      alert("Error: No recipient wallet address found for this model.");
+      return;
+    }
 
-            const response = await window.ic.plug.requestTransfer({
-              to: recipientPrincipal, 
-              amount: Math.floor(amountICP * 100_000_000),
-            });
-            console.log("Transfer response:", response);
+    try {
+      const amountICP = parseFloat(model.modelPrice.eth || "0");
+      console.log(`Transferring ${amountICP} ICP to ${model.wallet_principal_id}`);
 
-            await recordPurchaseInSupabase(authContext.principal, modelId);
-            window.location.href = "https://model-test-chi.vercel.app/";
-                    } catch (error) {
-            console.error("Transaction error:", error);
-          }
-        }
-      } catch (error) {
-        console.error("Connection error:", error);
-      }
-    } else {
-      console.error("Plug wallet not available.");
+      const response = await requestTransfer(model.wallet_principal_id, amountICP);
+      console.log("Transaction successful:", response);
+
+      await recordPurchaseInSupabase(authContext.principal, modelId);
+      alert("Purchase successful!");
+      window.location.href = "https://model-test-chi.vercel.app/";
+    } catch (error) {
+      console.error("Transaction failed:", error);
+      alert("Transaction failed. Please try again.");
     }
   };
 
