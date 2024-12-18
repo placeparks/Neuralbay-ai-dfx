@@ -61,28 +61,37 @@ export default function Details() {
       navigate("/login");
       return;
     }
-
+  
     if (!model || !model.wallet_principal_id) {
       console.error("Recipient wallet address is missing.");
       alert("Error: No recipient wallet address found for this model.");
       return;
     }
-
+  
     try {
       const amountICP = parseFloat(model.modelPrice.eth || "0");
       console.log(`Transferring ${amountICP} ICP to ${model.wallet_principal_id}`);
-
+  
       const response = await requestTransfer(model.wallet_principal_id, amountICP);
-      console.log("Transaction successful:", response);
-
-      await recordPurchaseInSupabase(authContext.principal, modelId);
-      alert("Purchase successful!");
-      window.location.href = "https://model-test-chi.vercel.app/";
+  
+      // Validate if transaction was successful
+      if (response && response.height) {
+        console.log("Transaction successful:", response);
+  
+        // Record purchase in Supabase
+        await recordPurchaseInSupabase(authContext.principal, modelId);
+        alert("Purchase successful!");
+        window.location.href = "https://model-test-chi.vercel.app/";
+      } else {
+        console.warn("Transaction canceled or failed.");
+        alert("Transaction was canceled or failed. Please try again.");
+      }
     } catch (error) {
-      console.error("Transaction failed:", error);
+      console.error("Transaction error:", error);
       alert("Transaction failed. Please try again.");
     }
   };
+  
 
   if (!model) {
     return <p>Loading...</p>;
