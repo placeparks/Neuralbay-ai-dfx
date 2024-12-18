@@ -55,28 +55,29 @@ export const usePlug = () => {
   const requestTransfer = async (to, amountICP) => {
     if (!(window.ic && window.ic.plug && typeof window.ic.plug.requestTransfer === "function")) {
       console.error("Plug wallet is not available or missing transfer method.");
-      return;
+      return null;
     }
-
+  
     try {
       const amountE8s = Math.floor(amountICP * 100_000_000); // Convert ICP to e8s
       console.log(`Attempting transfer of ${amountICP} ICP (${amountE8s} e8s) to ${to}`);
-
+  
       const response = await window.ic.plug.requestTransfer({ to, amount: amountE8s });
-      console.log("Transaction response:", response);
-
+  
+      // Validate if response is successful
       if (response && response.height) {
         console.log("Transaction successful with height:", response.height);
-        return response;
+        return response; // Success
       } else {
-        console.warn("Transaction not confirmed; 'height' field is empty.");
-        return null;
+        console.warn("Transaction not completed or canceled.");
+        return null; // Failure
       }
     } catch (error) {
-      console.error("Transaction failed:", error);
-      return null;
+      console.error("Transaction failed or canceled:", error);
+      return null; // Return null explicitly on failure
     }
   };
+  
 
   return { isConnected, principalId, connectPlug, requestTransfer };
 };
