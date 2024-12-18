@@ -50,6 +50,12 @@ export default function UploadModelForm() {
     },
   });
 
+  const handleLogin = async () => {
+    if (authContext && authContext.login) {
+      await authContext.login();
+    }
+  };
+
   const onSubmit = async (values) => {
     setIsLoading(true);
 
@@ -74,7 +80,7 @@ export default function UploadModelForm() {
       const canisterResponse = await backendActor.addModel(
         values.name,
         values.url,
-        values.walletPrincipalId // Pass the wallet principal to the canister
+        values.walletPrincipalId 
       );
 
       console.log("Canister response:", canisterResponse);
@@ -98,11 +104,12 @@ export default function UploadModelForm() {
               Please log in with DFINITY to access the marketplace.
             </p>
             <button
-              onClick={handleLogin}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg font-medium"
-            >
-              Login with DFINITY
-            </button>
+  onClick={login} // Use `login` from AuthContext
+  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg font-medium"
+>
+  Login with DFINITY
+</button>
+
             <button
               onClick={() => setShowLoginPrompt(false)}
               className="mt-4 w-full bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded-lg font-medium"
