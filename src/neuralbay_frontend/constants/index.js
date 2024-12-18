@@ -6,6 +6,7 @@ export const models = [
     ratings: "4.5k",
     likes: "3.2k",
     shortDes: "Generate detailed and realistic images from text prompts, transforming ideas into visuals with ease.",
+    wallet_principal_id: "zypwk-mxz6q-v42wq-bmz4u-341go-efs4w-iivlf-v5sss-ee5ay-5qf2b-bqe",
     modelPrice: {
       eth: "0.01",
       dollar: "167",
@@ -87,6 +88,7 @@ export const models = [
     ratings: "4.5k",
     likes: "3.2k",
     shortDes: "Generate clear, concise instructions and descriptions from any input text, streamlining your creative workflow.",
+    wallet_principal_id: "zypwk-mxz6q-v42wq-bmz4u-341go-efs4w-iivlf-v5sss-ee5ay-5qf2b-bqe", // Added recipient wallet
     modelPrice: {
       eth: "0.01",
       dollar: "167",
@@ -169,11 +171,11 @@ export const models = [
     likes: "3.2k",
     shortDes:
       "Convert spoken audio into accurate, readable text instantly, making transcription effortless.",
-
-    modelPrice: {
-      eth: "0.01",
-      dollar: "167",
-    },
+      wallet_principal_id: "zypwk-mxz6q-v42wq-bmz4u-341go-efs4w-iivlf-v5sss-ee5ay-5qf2b-bqe", // Added recipient wallet
+      modelPrice: {
+        eth: "0.01",
+        dollar: "167",
+      },
 
     modelTags: [
       "Text to Image",
